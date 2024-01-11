@@ -618,6 +618,7 @@ name = "rust_http_sample"
 version = "0.1.0"
 dependencies = [
  "reqwest",
+ "serde",
  "tokio",
 ]
 
