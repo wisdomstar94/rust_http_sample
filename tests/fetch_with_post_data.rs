@@ -2,7 +2,7 @@ use rust_http_sample::api_interface::api_1;
 use rust_http_sample::api_interface::common::{self, ResBucketTrait};
 
 #[tokio::test]
-async fn call_with_post_data() {
+async fn fetch_with_post_data() {
   let req_payload = api_1::ReqPayload {
     username: "mor_2314".to_string(),
     password: "83r5^_".to_string(),

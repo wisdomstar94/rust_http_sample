@@ -5,7 +5,7 @@ use rust_http_sample::api_interface::common::{self, ResBucketTrait};
 use tokio::try_join;
 
 #[tokio::test]
-async fn async_call_or_err_test() {
+async fn async_fetch_or_err_test() {
   let req_payload = api_1::ReqPayload {
     username: "mor_2314".to_string(),
     password: "83r5^_".to_string(),

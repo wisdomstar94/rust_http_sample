@@ -19,7 +19,7 @@ struct ResponseBody {
 }
 
 #[tokio::test]
-async fn sync_call_test() {
+async fn sync_fetch_test() {
   println!("req1 start");
   let res1 = call1().await;
   println!("res1 is {:#?}", res1.unwrap());

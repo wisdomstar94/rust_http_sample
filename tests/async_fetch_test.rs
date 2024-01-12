@@ -20,7 +20,7 @@ struct ResponseBody {
 }
 
 #[tokio::test]
-async fn async_call_test() {
+async fn async_fetch_test() {
   let joined = try_join!(call1(), call2(), call3());
   if let Ok((res1, res2, res3)) = joined {
     // ...
