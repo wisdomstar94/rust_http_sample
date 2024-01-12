@@ -1,17 +1,16 @@
-use rust_http_sample::apis::api_1;
-use rust_http_sample::apis::common::{self, ResBucketTrait};
+use rust_http_sample::apis::{self, common::{self, ResBucketTrait}};
 
 #[tokio::test]
 async fn fetch_with_post_data() {
-  let req_payload = api_1::ReqPayload {
+  let req_payload = apis::user::login::ReqPayload {
     username: "mor_2314".to_string(),
     password: "83r5^_".to_string(),
   };
-  let res = api_1::fetch(&req_payload).await;
+  let res = apis::user::login::fetch(&req_payload).await;
   if let Ok(res_bucket) = res {
     println!("api headers : {:?}", res_bucket.response.headers());
     println!("api status code : {:?}", res_bucket.response.status().as_u16());
-    match api_1::ResBucket::parse(res_bucket.response).await {
+    match apis::user::login::ResBucket::parse(res_bucket.response).await {
       common::ResParse::SuccessBody(x) => {
         match x {
           common::ResData::Struct(p) => {

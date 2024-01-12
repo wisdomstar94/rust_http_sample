@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use super::common::{self, ResBucketTrait};
+use super::super::common::{self, ResBucketTrait};
 
 // 요청페이로드 규격 정의
 #[derive(Debug, Serialize, Deserialize)]
