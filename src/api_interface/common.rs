@@ -19,36 +19,11 @@ pub struct ListBody {
   total_pages: u32,
   data: Vec<Data>,
 }
-pub struct BodyParse<T, E> {
-  success_body: Option<T>,
-  error_body: Option<E>,
-  error: Option<reqwest::Error>,
-}
 
-impl<T, E> BodyParse<T, E> {
-  pub fn new(
-    success_body: Option<T>,
-    error_body: Option<E>,
-    error: Option<reqwest::Error>,
-  ) -> Self {
-    BodyParse {
-      success_body,
-      error_body,
-      error,
-    }
-  }
-
-  pub fn get_success_body(&self) -> &Option<T> {
-    &self.success_body
-  }
-
-  pub fn get_error_body(&self) -> &Option<E> {
-    &self.error_body
-  }
-
-  pub fn get_error(&self) -> &Option<reqwest::Error> {
-    &self.error
-  }
+pub enum BodyParse<T, E> {
+  SuccessBody(T),
+  ErrorBody(E),
+  Error(Option<reqwest::Error>),
 }
 
 pub enum BodyData<T> {
@@ -111,11 +86,16 @@ where T: DeserializeOwned,
         }
       }
     
-      BodyParse::new(success_body, error_body, error)
+      if let Some(x) = success_body {
+        return BodyParse::SuccessBody(x);
+      }
+      if let Some(x) = error_body {
+        return BodyParse::ErrorBody(x);
+      }
+      BodyParse::Error(error)
     }
 
-    let a = func::<T, E>(response);
-    a
+    func::<T, E>(response)
     // let mut success_body: Option<BodyData<T>> = None;
     // let mut error_body: Option<BodyData<E>> = None;
     // let mut error: Option<reqwest::Error> = None;
