@@ -1,7 +1,7 @@
-use rust_http_sample::api_interface::api_1;
-use rust_http_sample::api_interface::api_2;
-use rust_http_sample::api_interface::api_3;
-use rust_http_sample::api_interface::common::{self, ResBucketTrait};
+use rust_http_sample::apis::api_1;
+use rust_http_sample::apis::api_2;
+use rust_http_sample::apis::api_3;
+use rust_http_sample::apis::common::{self, ResBucketTrait};
 use tokio::try_join;
 
 #[tokio::test]

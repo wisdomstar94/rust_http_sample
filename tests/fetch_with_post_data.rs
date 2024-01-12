@@ -1,5 +1,5 @@
-use rust_http_sample::api_interface::api_1;
-use rust_http_sample::api_interface::common::{self, ResBucketTrait};
+use rust_http_sample::apis::api_1;
+use rust_http_sample::apis::common::{self, ResBucketTrait};
 
 #[tokio::test]
 async fn fetch_with_post_data() {
