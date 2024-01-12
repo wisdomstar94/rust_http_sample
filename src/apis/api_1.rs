@@ -37,9 +37,14 @@ impl ResBucketTrait<ResStatusSuccessPayload, ResStatusErrorPayload> for ResBucke
 
 // 본 api 에 대한 요청을 날리고 응답 데이터를 반환하는 함수 정의
 pub async fn fetch(req_payload: &ReqPayload) -> Result<ResBucket, reqwest::Error> {
-  let client = reqwest::Client::new();
-  let response_result = client.post("https://fakestoreapi.com/auth/login").json(req_payload).send().await;
+  let client = common::get_reqwest_client();
+  if let Err(err) = client {
+    return Err(err);
+  }
+
+  let response_result = client.unwrap().post("https://fakestoreapi.com/auth/login").json(req_payload).send().await;
   if let Ok(response) = response_result {
+    println!("api 1 호출 완료");
     return Ok(ResBucket::new(response));
   } 
   if let Err(err) = response_result {

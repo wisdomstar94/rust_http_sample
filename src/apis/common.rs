@@ -1,4 +1,4 @@
-use std::future::Future;
+use std::{future::Future, time::Duration};
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -102,4 +102,17 @@ where T: DeserializeOwned,
 
     func::<T, E>(response)
   }
+}
+ 
+pub fn get_reqwest_client() -> Result<reqwest::Client, reqwest::Error> {
+  let mut default_headers = reqwest::header::HeaderMap::new();
+  default_headers.insert("X-MY-HEADER", reqwest::header::HeaderValue::from_static("value"));
+
+  let client: Result<reqwest::Client, reqwest::Error> = reqwest::Client::builder()
+    .user_agent("my-app/v0.0.1")
+    .default_headers(default_headers)
+    .timeout(Duration::from_secs(10))
+    .build();
+
+  client
 }

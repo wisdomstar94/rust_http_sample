@@ -1,16 +1,16 @@
-use rust_http_sample::apis::api_1;
-use rust_http_sample::apis::api_2;
-use rust_http_sample::apis::api_3;
-use rust_http_sample::apis::common::{self, ResBucketTrait};
+use rust_http_sample::apis::{api_1, api_2, api_3, common::{self, ResBucketTrait}};
 use tokio::try_join;
 
 #[tokio::test]
 async fn async_fetch_or_err_test() {
-  let req_payload = api_1::ReqPayload {
+  let api1_req_payload = api_1::ReqPayload {
     username: "mor_2314".to_string(),
     password: "83r5^_".to_string(),
   };
-  if let Ok((api1, api2, api3)) = try_join!(api_1::fetch(&req_payload), api_2::fetch(), api_3::fetch()) {
+  let api2_req_payload = api_2::ReqPayload {
+    page: 4,
+  };
+  if let Ok((api1, api2, api3)) = try_join!(api_1::fetch(&api1_req_payload), api_2::fetch(&api2_req_payload), api_3::fetch()) {
     // api1
     println!("api1 response header is {:?}", api1.response.headers());
     println!("api1 response status code is {:?}", api1.response.status().as_u16());

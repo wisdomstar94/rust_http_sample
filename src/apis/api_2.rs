@@ -4,7 +4,7 @@ use super::common::{self, ResBucketTrait};
 // 요청페이로드 규격 정의
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ReqPayload {
-  
+  pub page: u32,
 }
 
 // 응답패이로드 규격 정의
@@ -36,9 +36,15 @@ impl ResBucketTrait<ResStatusSuccessPayload, ResStatusErrorPayload> for ResBucke
 }
 
 // 본 api 에 대한 요청을 날리고 응답 데이터를 반환하는 함수 정의
-pub async fn fetch() -> Result<ResBucket, reqwest::Error> {
-  let response_result: Result<reqwest::Response, reqwest::Error> = reqwest::get("https://reqres.in/api/users?page=1").await;
+pub async fn fetch(req_payload: &ReqPayload) -> Result<ResBucket, reqwest::Error> {
+  let client = common::get_reqwest_client();
+  if let Err(err) = client {
+    return Err(err);
+  }
+
+  let response_result: Result<reqwest::Response, reqwest::Error> = client.unwrap().get("https://reqres.in/api/users").query(req_payload).send().await;
   if let Ok(response) = response_result {
+    println!("api 2 호출 완료");
     return Ok(ResBucket::new(response));
   } 
   if let Err(err) = response_result {
