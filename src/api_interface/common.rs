@@ -1,6 +1,11 @@
 use std::future::Future;
-
 use serde::{Serialize, Deserialize, de::DeserializeOwned};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResStatusErrorPayload {
+  timestamp: u32,
+  reason: String,
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Data {
@@ -12,26 +17,26 @@ pub struct Data {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ListBody {
-  page: u32,
-  per_page: u32,
-  total: u32,
-  total_pages: u32,
-  data: Vec<Data>,
+pub struct ResStatusSuccessListPayload {
+  pub page: u32,
+  pub per_page: u32,
+  pub total: u32,
+  pub total_pages: u32,
+  pub data: Vec<Data>,
 }
 
-pub enum BodyParse<T, E> {
+pub enum ResParse<T, E> {
   SuccessBody(T),
   ErrorBody(E),
   Error(Option<reqwest::Error>),
 }
 
-pub enum BodyData<T> {
+pub enum ResData<T> {
   Struct(T),
   Text(String),
 }
 
-pub trait ApiStruct<T, E> 
+pub trait ResBucketTrait<T, E> 
 where T: DeserializeOwned,
       E: DeserializeOwned,
 {
@@ -39,14 +44,14 @@ where T: DeserializeOwned,
 
   // fn get_response(&self) -> reqwest::Response;
 
-  fn parse<'a>(response: reqwest::Response) -> impl Future<Output = BodyParse<BodyData<T>, BodyData<E>>> {
+  fn parse<'a>(response: reqwest::Response) -> impl Future<Output = ResParse<ResData<T>, ResData<E>>> {
 
-    async fn func<TT, EE>(response: reqwest::Response) -> BodyParse<BodyData<TT>, BodyData<EE>> 
+    async fn func<TT, EE>(response: reqwest::Response) -> ResParse<ResData<TT>, ResData<EE>> 
     where TT: DeserializeOwned,
           EE: DeserializeOwned,  
     {
-      let mut success_body: Option<BodyData<TT>> = None;
-      let mut error_body: Option<BodyData<EE>> = None;
+      let mut success_body: Option<ResData<TT>> = None;
+      let mut error_body: Option<ResData<EE>> = None;
       let mut error: Option<reqwest::Error> = None;
 
       if response.status().is_server_error() || response.status().is_client_error() {
@@ -56,10 +61,10 @@ where T: DeserializeOwned,
             let struct_try = serde_json::from_str::<EE>(&body);
             match struct_try {
               Ok(t) => {
-                error_body = Some(BodyData::Struct(t));
+                error_body = Some(ResData::Struct(t));
               },
               Err(_) => {
-                error_body = Some(BodyData::Text(body));
+                error_body = Some(ResData::Text(body));
               },
             }
           },
@@ -73,10 +78,10 @@ where T: DeserializeOwned,
             let struct_try = serde_json::from_str::<TT>(&body);
             match struct_try {
               Ok(t) => {
-                success_body = Some(BodyData::Struct(t));
+                success_body = Some(ResData::Struct(t));
               },
               Err(_) => {
-                success_body = Some(BodyData::Text(body));
+                success_body = Some(ResData::Text(body));
               },
             }
           },
@@ -87,33 +92,14 @@ where T: DeserializeOwned,
       }
     
       if let Some(x) = success_body {
-        return BodyParse::SuccessBody(x);
+        return ResParse::SuccessBody(x);
       }
       if let Some(x) = error_body {
-        return BodyParse::ErrorBody(x);
+        return ResParse::ErrorBody(x);
       }
-      BodyParse::Error(error)
+      ResParse::Error(error)
     }
 
     func::<T, E>(response)
   }
-}
-
-pub trait TypeWrapper {
-  fn check(&self) -> Option<Self>
-  where
-    Self: Sized;
-}
-
-impl TypeWrapper for String {
-  fn check(&self) -> Option<String> {
-    Some("String".to_string())
-  }
-}
-
-pub fn type_check<U>(x: U) -> Option<U>
-where
-  U: TypeWrapper,
-{
-  x.check()
 }
