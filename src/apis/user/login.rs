@@ -1,4 +1,6 @@
 use serde::{Serialize, Deserialize};
+use crate::apis::common::{ReqBucket, ResponseMiddlewareData};
+
 use super::super::common::{self, ResBucketTrait};
 
 // 요청페이로드 규격 정의
@@ -24,11 +26,11 @@ pub struct ResStatusSuccessPayload {
 pub type ResStatusErrorPayload = common::ResStatusErrorPayload;
 
 // 응답 객체를 받아 parse 처리를 하는 struct 정의
+// #[derive(ResBucketMacro)]
 pub struct ResBucket {
   pub response: reqwest::Response,
 }
 
-// ResBucket 을 ResBucketTrait 으로 확장하여 parse 부분은 ResBucketTrait 에 구현된 기본 parse 함수 그대로 사용
 impl ResBucketTrait<ResStatusSuccessPayload, ResStatusErrorPayload> for ResBucket {
   fn new(response: reqwest::Response) -> Self {
     ResBucket { response }
@@ -42,12 +44,19 @@ pub async fn fetch(req_payload: &ReqPayload) -> Result<ResBucket, reqwest::Error
     return Err(err);
   }
 
-  let response_result = client.unwrap().post("https://fakestoreapi.com/auth/login").json(req_payload).send().await;
+  let req_bucket = ReqBucket::new(
+    "https://fakestoreapi.com/auth/login".to_string(), 
+    reqwest::Method::POST, 
+    Some(req_payload)
+  );
+  let _ = req_bucket.request_middleware().await;
+  let response_result = client.unwrap().request(req_bucket.method().clone(), req_bucket.url()).json(req_payload).send().await;
   if let Ok(response) = response_result {
-    println!("api 1 호출 완료");
+    let _ = ResBucket::response_middleware(ResponseMiddlewareData::Response(&response)).await;
     return Ok(ResBucket::new(response));
   } 
   if let Err(err) = response_result {
+    let _ = ResBucket::response_middleware(ResponseMiddlewareData::Error(&err)).await;
     return Err(err);
   }
   panic!("uncatch error..!");
